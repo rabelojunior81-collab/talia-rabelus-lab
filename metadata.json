@@ -1,0 +1,9 @@
+{
+  "name": "talia - lyria version",
+  "description": "An advanced AI interface for \u0027talia.ai\u0027, a specialized linguistic assistant. Scalable architecture for team collaboration with real-time audio/visual capabilities.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera",
+    "geolocation"
+  ]
+}
