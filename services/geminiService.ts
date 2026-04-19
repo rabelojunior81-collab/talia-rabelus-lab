@@ -2,6 +2,7 @@
 import { GoogleGenAI, Part, Content, Tool, Type, FunctionDeclaration } from "@google/genai";
 import { ChatMessage, GroundingSource, MediaAsset, ImageGenerationConfig } from '../types';
 import { db } from './db';
+import { getApiKey } from './apiKeyManager';
 
 export const YOUTUBE_PROXY_URL: string = '';
 
@@ -144,7 +145,7 @@ export const getChatResponse = async (
     useSearch: boolean = false
 ): Promise<{ text: string, sources?: GroundingSource[], generatedAssets?: any[], openImageStudio?: string, openMusicStudio?: string }> => {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const contents: Content[] = [];
     
     // Switch between Search Grounding AND Function Declarations
@@ -279,7 +280,7 @@ export const getChatResponse = async (
 };
 
 export const generateImageWithConfig = async (config: ImageGenerationConfig): Promise<Blob | null> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const model = 'gemini-3.1-flash-image-preview';
     const response = await ai.models.generateContent({
         model: model,
@@ -303,8 +304,7 @@ export const generateImageWithConfig = async (config: ImageGenerationConfig): Pr
 };
 
 export const generateMusicWithConfig = async (config: { prompt: string, duration: 'clip' | 'pro', lyrics?: string, image?: File }): Promise<{ audio: Blob, lyrics: string } | null> => {
-    const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
-    const ai = new GoogleGenAI({ apiKey: apiKey });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const model = config.duration === 'clip' ? 'lyria-3-clip-preview' : 'lyria-3-pro-preview';
     
     let promptText = config.prompt;
@@ -379,7 +379,7 @@ export const generateImageAsset = async (prompt: string): Promise<Blob | null> =
 };
 
 export const generateTitleForSession = async (messages: ChatMessage[]): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const text = messages.slice(0, 5).map(m => m.text).filter(t => t.trim() !== "").join('\n');
     if (!text.trim()) return "Nova Conversa";
     
@@ -391,7 +391,7 @@ export const generateTitleForSession = async (messages: ChatMessage[]): Promise<
 };
 
 export const generateDocumentFromConversation = async (messages: ChatMessage[], title: string, formatConfig: any): Promise<string> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const text = messages.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n');
     const response = await ai.models.generateContent({
         model: 'gemini-3.1-pro-preview',
@@ -401,7 +401,7 @@ export const generateDocumentFromConversation = async (messages: ChatMessage[], 
 };
 
 export const analyzeConversationForReports = async (messages: ChatMessage[]): Promise<any[]> => {
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ apiKey: getApiKey() });
     const text = messages.map(m => `${m.role}: ${m.text}`).join('\n');
     const response = await ai.models.generateContent({
         model: 'gemini-3.1-flash-preview',

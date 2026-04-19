@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Send, Link as LinkIcon, Database, Sparkles, ChevronRight } from './icons/Icons';
+import { Send, Link as LinkIcon, Database, Sparkles, ChevronRight, Eye, EyeOff, Check } from './icons/Icons';
+import { setApiKey, hasApiKey } from '../services/apiKeyManager';
 
 interface OnboardingModalProps {
   onComplete: (name: string) => void;
@@ -12,6 +13,10 @@ interface OnboardingModalProps {
 const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, onKeySelected, hasKeyInitial, currentName }) => {
   const [name, setName] = useState(currentName);
   const [step, setStep] = useState(currentName ? 1 : 0);
+  const [apiKey, setApiKeyInput] = useState('');
+  const [showKey, setShowKey] = useState(false);
+  const [keySaved, setKeySaved] = useState(hasKeyInitial);
+  const [keyError, setKeyError] = useState('');
 
   const handleNameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,10 +29,22 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, onKeySele
     onComplete(name);
   };
 
-  const handleOpenKeyDialog = async () => {
-      await window.aistudio.openSelectKey();
-      onKeySelected();
-      onComplete(name);
+  const handleSaveKey = () => {
+    const trimmed = apiKey.trim();
+    if (!trimmed.startsWith('AIza') || trimmed.length < 30) {
+      setKeyError('Chave inválida. Deve começar com "AIza" e ter pelo menos 30 caracteres.');
+      return;
+    }
+    setKeyError('');
+    setApiKey(trimmed);
+    setKeySaved(true);
+    onKeySelected();
+    // Avança automaticamente após salvar
+    setTimeout(() => onComplete(name), 600);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSaveKey();
   };
 
   return (
@@ -73,22 +90,58 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, onKeySele
                     <h3 className="text-white font-bold text-[10px] uppercase tracking-widest">NÚCLEO DE PROCESSAMENTO</h3>
                 </div>
                 <p className="text-[11px] text-gray-500 leading-relaxed font-sans">
-                    Você pode utilizar o núcleo nativo da Talia ou sincronizar uma chave de projeto pago para recursos de alta fidelidade e limites estendidos.
+                    Insira sua chave de API do Google Gemini para ativar o núcleo de Talia. Sua chave é armazenada apenas localmente no seu navegador.
                 </p>
+
+                {/* API Key Input */}
+                <div className="space-y-2">
+                    <div className="relative flex items-center">
+                        <input
+                            type={showKey ? 'text' : 'password'}
+                            value={apiKey}
+                            onChange={(e) => { setApiKeyInput(e.target.value); setKeyError(''); setKeySaved(false); }}
+                            onKeyDown={handleKeyPress}
+                            placeholder="AIza..."
+                            className="w-full bg-white/[0.03] border border-white/10 text-white text-xs font-mono px-4 py-3 pr-20 focus:outline-none focus:border-talia-red/50 placeholder-gray-700 transition-all"
+                        />
+                        <div className="absolute right-2 flex items-center gap-1">
+                            <button
+                                type="button"
+                                onClick={() => setShowKey(!showKey)}
+                                className="p-1.5 text-gray-600 hover:text-gray-300 transition-colors"
+                            >
+                                {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                            {keySaved && (
+                                <div className="p-1.5 text-green-400">
+                                    <Check className="w-3.5 h-3.5" />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    {keyError && (
+                        <p className="text-[10px] text-red-400 font-sans">{keyError}</p>
+                    )}
+                    {keySaved && (
+                        <p className="text-[10px] text-green-400 font-sans">✓ Chave salva com sucesso</p>
+                    )}
+                </div>
+
                 <div className="flex flex-col gap-2 pt-2">
-                    <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="text-[9px] text-gray-600 font-bold uppercase tracking-widest hover:text-talia-red flex items-center gap-1.5 transition-colors">
-                        <LinkIcon className="w-3 h-3" /> SOBRE CHAVES DE PROJETOS PAGOS
+                    <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="text-[9px] text-gray-600 font-bold uppercase tracking-widest hover:text-talia-red flex items-center gap-1.5 transition-colors">
+                        <LinkIcon className="w-3 h-3" /> OBTER CHAVE NO GOOGLE AI STUDIO
                     </a>
                 </div>
             </div>
             
             <div className="flex flex-col gap-3">
                 <button
-                    onClick={handleNativeAccess}
-                    className="w-full bg-white/5 border border-white/10 py-5 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-300 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 group"
+                    onClick={handleSaveKey}
+                    disabled={!apiKey.trim() || keySaved}
+                    className="w-full bg-talia-red py-5 text-[10px] font-bold uppercase tracking-[0.3em] text-white shadow-[0_10px_30px_rgba(255,59,59,0.15)] hover:scale-[1.01] transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                    <Sparkles className="w-3.5 h-3.5 text-talia-red" />
-                    ACESSAR COM NÚCLEO NATIVO
+                    <Database className="w-3.5 h-3.5" />
+                    {keySaved ? 'CHAVE ATIVA — ENTRANDO...' : 'SINCRONIZAR CHAVE'}
                 </button>
 
                 <div className="flex items-center gap-4 py-2">
@@ -98,11 +151,11 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, onKeySele
                 </div>
 
                 <button
-                    onClick={handleOpenKeyDialog}
-                    className="w-full bg-talia-red py-5 text-[10px] font-bold uppercase tracking-[0.3em] text-white shadow-[0_10px_30px_rgba(255,59,59,0.15)] hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+                    onClick={handleNativeAccess}
+                    className="w-full bg-white/5 border border-white/10 py-5 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-300 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 group"
                 >
-                    <Database className="w-3.5 h-3.5" />
-                    SINCRONIZAR CHAVE EXTERNA
+                    <Sparkles className="w-3.5 h-3.5 text-talia-red" />
+                    ENTRAR SEM CHAVE (LIMITADO)
                 </button>
             </div>
             

@@ -15,6 +15,7 @@ import useLocalStorage from './hooks/useLocalStorage';
 import { useMediaAssets } from './hooks/useMediaAssets'; 
 import { AutonomyMode, ImageGenerationConfig, MusicGenerationConfig } from './types';
 import { generateImageWithConfig, generateMusicWithConfig } from './services/geminiService';
+import { hasApiKey } from './services/apiKeyManager';
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
@@ -61,20 +62,27 @@ export default function App() {
   }, [activeSession?.id, activeProjectId]);
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
     const checkStatus = async () => {
-      // @ts-ignore
-      const keySelected = await window.aistudio.hasSelectedApiKey();
-      setHasKey(keySelected);
-      
-      const timer = setTimeout(() => {
+      let keyAvailable = hasApiKey(); // Checa localStorage primeiro
+      if (!keyAvailable) {
+        try {
+          // @ts-ignore
+          const keySelected = await window.aistudio?.hasSelectedApiKey?.();
+          keyAvailable = !!keySelected;
+        } catch {
+          // Fora do ambiente AI Studio — ok, sem chave nativa
+        }
+      }
+      setHasKey(keyAvailable);
+      timer = setTimeout(() => {
         setShowIntro(false);
-        // O onboarding agora só aparece se o nome não estiver definido.
-        // Se o nome existe, o usuário já pode entrar.
-        if (!userName) setShowOnboarding(true);
+        // Mostra onboarding se: sem nome OU sem chave
+        if (!userName || !keyAvailable) setShowOnboarding(true);
       }, 1200);
-      return () => clearTimeout(timer);
     };
     checkStatus();
+    return () => clearTimeout(timer);
   }, [userName]);
 
   const handleOnboardingComplete = async (name: string) => {
@@ -84,9 +92,13 @@ export default function App() {
       setShowOnboarding(false);
       
       // Checagem silenciosa por chaves
-      // @ts-ignore
-      const keySelected = await window.aistudio.hasSelectedApiKey();
-      setHasKey(keySelected);
+      try {
+        // @ts-ignore
+        const keySelected = await window.aistudio?.hasSelectedApiKey?.();
+        setHasKey(!!keySelected);
+      } catch {
+        setHasKey(false);
+      }
   };
 
   const handleStudioGenerate = async (config: ImageGenerationConfig) => {

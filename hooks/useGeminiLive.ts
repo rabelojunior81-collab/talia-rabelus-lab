@@ -4,6 +4,7 @@ import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
 import { useLiveAudio } from './useLiveAudio';
 import { liveTools, taliaPersona } from '../services/geminiService';
 import { db } from '../services/db';
+import { getApiKey } from '../services/apiKeyManager';
 
 const MODEL_NAME = 'gemini-3.1-flash-live-preview';
 
@@ -32,6 +33,8 @@ export const useGeminiLive = (sessionId: string, onOpenImageStudio?: (prompt: st
   const isReconnectingRef = useRef(false);
   const sessionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const currentSessionIdRef = useRef<string | undefined>(undefined);
+  // Guard: evita envio de chunks de áudio para WebSocket já fechada
+  const isAudioActiveRef = useRef(false);
 
   const assets = useLiveQuery(
       () => db.assets.where({ sessionId }).toArray(),
@@ -58,12 +61,8 @@ export const useGeminiLive = (sessionId: string, onOpenImageStudio?: (prompt: st
           if (newOrUpdatedAssets.length > 0 || deletedAssets.length > 0) {
               sessionRef.current.then(async (session: any) => {
                   for (const asset of deletedAssets) {
-                      session.sendClientContent({
-                          turns: [{
-                              role: 'user',
-                              parts: [{ text: `[SISTEMA: Arquivo removido do Stage: "${asset.fileName}"]` }]
-                          }],
-                          turnComplete: true
+                      session.sendRealtimeInput({
+                          text: `[SISTEMA: Arquivo removido do Stage: "${asset.fileName}"]`
                       });
                   }
 
@@ -87,12 +86,8 @@ export const useGeminiLive = (sessionId: string, onOpenImageStudio?: (prompt: st
                       } else if ((asset.type === 'documento' || asset.type === 'codigo' || asset.mimeType?.startsWith('text/')) && asset.blob) {
                           try {
                               const text = await asset.blob.text();
-                              session.sendClientContent({
-                                  turns: [{
-                                      role: 'user',
-                                      parts: [{ text: `[SISTEMA: ${prefix}: "${asset.fileName}" (Tipo: ${asset.type})]\n\`\`\`\n${text.substring(0, 3000)}\n\`\`\`` }]
-                                  }],
-                                  turnComplete: true
+                              session.sendRealtimeInput({
+                                  text: `[SISTEMA: ${prefix}: "${asset.fileName}" (Tipo: ${asset.type})]\n\`\`\`\n${text.substring(0, 3000)}\n\`\`\``
                               });
                           } catch (e) {
                               console.warn("Erro ao enviar documento do stage para a sessão de voz", e);
@@ -141,8 +136,11 @@ export const useGeminiLive = (sessionId: string, onOpenImageStudio?: (prompt: st
   };
 
   const connect = useCallback(async (sessionId?: string, isRestart: boolean = false) => {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return;
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      setError('Chave de API Gemini não configurada. Recarregue a página e insira sua API Key no onboarding.');
+      return;
+    }
 
     if (!isRestart) {
         currentSessionIdRef.current = sessionId;
@@ -216,7 +214,6 @@ ${stageAssetsContext || "Nenhum ativo no Stage no momento."}
         config: {
           responseModalities: [Modality.AUDIO],
           tools: liveTools,
-          toolConfig: { includeServerSideToolInvocations: true },
           inputAudioTranscription: {},
           outputAudioTranscription: {},
           speechConfig: {
@@ -250,15 +247,15 @@ ${stageAssetsContext || "Nenhum ativo no Stage no momento."}
                                     });
                                 } else {
                                     const textContent = await asset.blob.text();
-                                    sessionRef.current.then((session: any) => {
-                                        session.sendClientContent({
-                                            turns: [{
-                                                role: 'user',
-                                                parts: [{ text: `[SISTEMA: Conteúdo inicial do arquivo no Stage: "${asset.fileName}"]\n\`\`\`\n${textContent}\n\`\`\`` }]
-                                            }],
-                                            turnComplete: true
+                                    if (isAudioActiveRef.current && sessionRef.current) {
+                                        sessionRef.current.then((session: any) => {
+                                            try {
+                                                session.sendRealtimeInput({
+                                                    text: `[SISTEMA: Conteúdo inicial do arquivo no Stage: "${asset.fileName}"]\n\`\`\`\n${textContent}\n\`\`\``
+                                                });
+                                            } catch {}
                                         });
-                                    });
+                                    }
                                 }
                             } catch (e) {
                                 console.warn(`Erro ao enviar ativo inicial ${asset.fileName} para sessão de voz:`, e);
@@ -268,19 +265,23 @@ ${stageAssetsContext || "Nenhum ativo no Stage no momento."}
                 }
 
                 liveAudio.startRecording((base64Data) => {
-                   if (sessionRef.current) {
-                       sessionRef.current.then((session: any) => {
-                           try {
-                               session.sendRealtimeInput({
-                                   audio: { mimeType: 'audio/pcm;rate=16000', data: base64Data }
-                               });
-                           } catch (e) {
-                               // Ignorar erros de envio durante a transição de sockets
-                           }
-                       });
-                   }
+                   if (!isAudioActiveRef.current || !sessionRef.current) return;
+                   sessionRef.current.then((session: any) => {
+                       if (!isAudioActiveRef.current) return;
+                       try {
+                           session.sendRealtimeInput({
+                               audio: { mimeType: 'audio/pcm;rate=16000', data: base64Data }
+                           });
+                       } catch (e) {
+                           // WebSocket fechou antes do onclose processar —
+                           // desativar imediatamente para drenar a fila do worklet
+                           isAudioActiveRef.current = false;
+                           liveAudio.stopRecording();
+                       }
+                   });
                 });
             }
+            isAudioActiveRef.current = true; // Ativar envio de áudio após startRecording
             isReconnectingRef.current = false; // Restart concluído com sucesso
           },
           onmessage: async (message: LiveServerMessage) => {
@@ -402,6 +403,7 @@ ${stageAssetsContext || "Nenhum ativo no Stage no momento."}
             }
           },
           onclose: () => {
+              isAudioActiveRef.current = false; // Parar envio de chunks ANTES de stopRecording
               if (!isReconnectingRef.current) {
                   setIsConnected(false);
                   liveAudio.stopRecording();
@@ -409,6 +411,7 @@ ${stageAssetsContext || "Nenhum ativo no Stage no momento."}
               }
           },
           onerror: (e: any) => {
+              isAudioActiveRef.current = false; // Parar envio de chunks ANTES de stopRecording
               if (!isReconnectingRef.current) {
                   setError("Conexão de voz interrompida ou falhou.");
                   setIsConnected(false);
