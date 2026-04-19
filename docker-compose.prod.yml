@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  talia-web-prod:
+    container_name: talia-web-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # A API key precisa ser passada na etapa de build para ser embutida no frontend
+        - GEMINI_API_KEY=${GEMINI_API_KEY:-""}
+    ports:
+      # O Nginx interno responde na 80, mas vamos expor na 3000 para a máquina hospedeira ficar padronizada
+      - "3000:80"
+    env_file:
+      - .env
+    restart: always

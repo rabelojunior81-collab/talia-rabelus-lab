@@ -1,0 +1,19 @@
+# Imagem NodeJS Base leve
+FROM node:22-alpine
+
+# Setando diretório de trabalho padrão do container
+WORKDIR /app
+
+# Copiar arquivos de descrição e travas de versão
+COPY package.json package-lock.json ./
+
+# Instalar todas as dependências localmente dentro do ubuntu/alpine
+RUN npm ci
+
+# As pastas locais serão espelhadas utilizando Volumes do Docker-Compose
+# Então não precisamos dar um COPY de tudo nesta etapa, a não ser que rodássemos puro.
+# Expondo a porta necessária que o Vite usa
+EXPOSE 3000
+
+# Iniciando em modo de desenvolvimento ativando flags para acesso externo no container
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

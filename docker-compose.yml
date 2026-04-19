@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  talia-web-dev:
+    container_name: talia-web-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Espelhamento da sua pasta atual para dentro do container
+      - ./:/app
+      # Isolamento do node_modules para não dar conflito (Windows/Mac vs Linux)
+      - /app/node_modules
+    env_file:
+      - .env
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Auxilia no Hot-Reload do Vite em alguns sistemas (como Windows WSL)
+      - WATCHPACK_POLLING=true
