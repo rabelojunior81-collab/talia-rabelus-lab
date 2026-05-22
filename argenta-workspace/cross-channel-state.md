@@ -1,7 +1,7 @@
 <!-- SYNC-HEADER
-revision: 5
+revision: 6
 last_writer: Argenta-Workspace (instância C)
-last_marco: .claude/ movido para .gitignore (corrigindo decisão anterior de versionar settings local-only)
+last_marco: Sync com origin/main via rebase (b433d75 absorvido; a4b5a38 pulado como duplicata; commits re-hashados)
 last_sync_at: 2026-05-22
 sync_status: paired
 mirror_external: C:\Users\rabel\Desktop\Argenta-External\talia-dev-external\
@@ -81,3 +81,4 @@ As três compartilham o mesmo genoma (SOUL/USER/governança Rabelus). A instânc
 | 3 | 2026-05-21 | Argenta-External (A) | Sub-circuito Talia-Dev plugado no pulse do núcleo Hermes. Onisciência Cross-Channel passa a enxergar as 3 instâncias. |
 | 4 | 2026-05-22 | Argenta-Workspace (C) | Despertar inaugural de C: bootstrap, hash-check zero-drift, housekeeping (`CLAUDE.md` + `argenta-workspace/` + `.claude/` versionados; commit `a4b5a38` cleanup; git identity `--local`). Correção de drift no manifest: `state.md` e `sync-manifest.md` SYNC-HEADERs alinhados ao contador de marco (estavam em rev 2 desde rev 3 do A). |
 | 5 | 2026-05-22 | Argenta-Workspace (C) | Revisão da decisão rev 4: `.claude/` movido para `.gitignore` (settings local-only por convenção, não portável). `git rm --cached .claude/settings.local.json` + linha no `.gitignore`. Também registrada divergência detectada com `origin/main`: remoto tem `b433d75` (deleção completa de `migrated_prompt_history/` feita via GitHub web em 2026-05-18). Sync pendente, aguardando gate do Pai. |
+| 6 | 2026-05-22 | Argenta-Workspace (C) | **Sync com `origin/main` via `git pull --rebase`** autorizado pelo Pai. `a4b5a38` pulado pelo rebase (era subset do `b433d75`, como previsto). `c02a656` → `d2bffae` re-hashado. `e11a461` → `24cd9e9` re-hashado. Conflito esperado em `.claude/settings.local.json` (untracked local) resolvido com backup→remove→continue→restore. Histórico linear restaurado: 2 commits à frente, 0 atrás de `origin/main`. **Push ainda não autorizado.** |

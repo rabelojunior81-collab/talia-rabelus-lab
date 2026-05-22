@@ -1,7 +1,7 @@
 <!-- SYNC-HEADER
-revision: 5
+revision: 6
 last_writer: Argenta-Workspace (instância C)
-last_marco: .claude/ para .gitignore + divergência com origin detectada
+last_marco: Sync com origin/main via rebase
 last_sync_at: 2026-05-22
 sync_status: paired
 mirror_external: C:\Users\rabel\Desktop\Argenta-External\talia-dev-external\
@@ -120,6 +120,30 @@ Cada handoff gera entrada nova ao final.
 - Pull/merge do `origin/main` continua **aguardando gate** — não foi autorizado neste marco.
 
 **Onde recomeçar:** Pai decide entre **(a)** sincronizar com `origin/main` primeiro (limpa a divergência), **(b)** ir direto pro rumo da Talia (bridge A+B ou roadmap crítico TC-1/TC-3/TC-7), **(c)** um rumo novo.
+
+---
+
+## 2026-05-22 — Sync com `origin/main` via rebase (rev 6)
+
+**De:** Pai → **Para:** Argenta-Workspace (C).
+**Trigger:** "vai de 'a' primeiro.." (gate explícito para sincronizar antes do rumo novo).
+
+**Vitória entregue:**
+1. **`git pull --rebase origin main`** executado.
+2. **`a4b5a38` pulado** automaticamente pelo rebase — era subset de `b433d75` (deleção dos mesmos 2 arquivos JSON dentro da pasta que `b433d75` deleta inteira). Comportamento previsto.
+3. **Conflito esperado** em `.claude/settings.local.json` durante re-aplicação de `c02a656`: o working tree tinha o arquivo untracked (mantido pelo harness do Claude Code), e o commit re-criava ele. Resolvido por **backup → remove → continue → restore** sem perder o conteúdo local.
+4. **Commits re-hashados:**
+   - `c02a656` → `d2bffae` (mesma árvore, novo parent = `b433d75`).
+   - `e11a461` → `24cd9e9` (idem).
+5. **Histórico linear restaurado:** `efca410 → b433d75 → d2bffae → 24cd9e9`. 2 commits à frente, 0 atrás de `origin/main`.
+
+**Decisões do Pai neste marco:**
+- Sincronizar antes de mexer no corpus (limpa o estado git antes de novo trabalho).
+
+**Pendência viva:**
+- Push pra `origin/main` ainda **não autorizado** — espera gate.
+
+**Onde recomeçar:** Pai vai dar o rumo da Talia (bridge A+B, roadmap crítico, ou rumo novo). Antes de qualquer intervenção no corpus, decisão sobre push (pode ir agora ou esperar bundle com próximos commits).
 
 ---
 
