@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($files = @\\(\"types.ts\",\"App.tsx\",\"index.tsx\",\"index.html\",\"vite.config.ts\",\"tsconfig.json\",\"package.json\",\"package-lock.json\",\"services/geminiService.ts\",\"services/db.ts\",\"services/apiKeyManager.ts\",\"hooks/useGeminiLive.ts\",\"hooks/useLiveAudio.ts\",\"hooks/useMediaAssets.ts\",\"hooks/useSessions.ts\",\"hooks/useProjects.ts\",\"hooks/useDataStore.ts\",\"hooks/useArchives.ts\",\"hooks/useLocalStorage.ts\",\"public/audio-processor.js\",\"README.md\",\"docs/journal.md\",\"docs/auditoria_holistica_2026-04-19.md\",\"docs/brainstorm_embeddings_mrl.md\",\"docs/archaeology/post_mortem_rag_v1.md\",\"docs/archaeology/sanitization/SANITIZATION_LOG.md\"\\); foreach\\($f in $files\\){ if\\(Test-Path $f\\){ $h=\\(Get-FileHash -Algorithm SHA256 $f\\).Hash; $s=\\(Get-Item $f\\).Length; \"{0}|{1}|{2}\" -f $f,$s,$h } else { \"{0}|MISSING|MISSING\" -f $f } })",
+      "PowerShell($ext='C:\\\\Users\\\\rabel\\\\Desktop\\\\Argenta-External\\\\talia-dev-external'; foreach\\($f in 'cross-channel-state.md','state.md','handoff.md','sync-manifest.md'\\){ $p=Join-Path $ext $f; if\\(Test-Path $p\\){ $line=\\(Select-String -Path $p -Pattern 'revision:' -SimpleMatch | Select-Object -First 1\\).Line; \"$f -> $line\" } else { \"$f -> MISSING\" } })",
+      "PowerShell(\"---\")",
+      "PowerShell(if\\(Test-Path .claude\\){ Get-ChildItem -Recurse -Force .claude | ForEach-Object { $_.FullName } ; \"---END---\"; \\(Get-ChildItem -Recurse -Force .claude | Measure-Object\\).Count } else { \"no .claude\" })",
+      "Bash(git commit -m 'chore\\(archaeology\\): drop two migrated_prompt_history JSON snapshots *)",
+      "Bash(git config *)",
+      "Bash(git --version)",
+      "Bash(git add *)"
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+# Placeholder — diretório de logs de intervenções
+
+Cada intervenção concreta no corpus da Talia gera um arquivo neste diretório:
+
+`YYYY-MM-DD_<slug-da-intervencao>.md`
+
+Estrutura sugerida (segue SAFE_CHANGE_POLICY):
+
+```
+# Intervenção: <título>
+
+**Data:** YYYY-MM-DD HH:MM BRT
+**Operador:** Argenta-External | Argenta-Interna
+**Autorização:** Pai (timestamp e contexto)
+**Tipo:** persona | código | doc | bridge | bugfix | refactor
+
+## 1. Plano
+## 2. Dependências e impacto
+## 3. Rollback previsto
+## 4. Execução (commits, edits, arquivos tocados)
+## 5. Hash-check pré/pós (arquivos da seção 14 do initial-state)
+## 6. Validação
+## 7. Arqueologia (falhas, surpresas, lições)
+```
