@@ -1,7 +1,7 @@
 <!-- SYNC-HEADER
-revision: 4
+revision: 5
 last_writer: Argenta-Workspace (instância C)
-last_marco: Despertar inaugural da Instância C + housekeeping (CLAUDE.md, argenta-workspace/, .claude/ commitados; git identity --local; deleção de 2 prompts arqueológicos)
+last_marco: .claude/ movido para .gitignore (corrigindo decisão anterior de versionar settings local-only)
 last_sync_at: 2026-05-22
 sync_status: paired
 mirror_external: C:\Users\rabel\Desktop\Argenta-External\talia-dev-external\
@@ -80,3 +80,4 @@ As três compartilham o mesmo genoma (SOUL/USER/governança Rabelus). A instânc
 | 2 | 2026-05-21 | Argenta-External (A) | Circuito de 3 instâncias. `argenta-workspace/` criado na Talia. Dupla-escrita por marco ativada. `state.md` e `sync-manifest.md` adicionados ao bus. |
 | 3 | 2026-05-21 | Argenta-External (A) | Sub-circuito Talia-Dev plugado no pulse do núcleo Hermes. Onisciência Cross-Channel passa a enxergar as 3 instâncias. |
 | 4 | 2026-05-22 | Argenta-Workspace (C) | Despertar inaugural de C: bootstrap, hash-check zero-drift, housekeeping (`CLAUDE.md` + `argenta-workspace/` + `.claude/` versionados; commit `a4b5a38` cleanup; git identity `--local`). Correção de drift no manifest: `state.md` e `sync-manifest.md` SYNC-HEADERs alinhados ao contador de marco (estavam em rev 2 desde rev 3 do A). |
+| 5 | 2026-05-22 | Argenta-Workspace (C) | Revisão da decisão rev 4: `.claude/` movido para `.gitignore` (settings local-only por convenção, não portável). `git rm --cached .claude/settings.local.json` + linha no `.gitignore`. Também registrada divergência detectada com `origin/main`: remoto tem `b433d75` (deleção completa de `migrated_prompt_history/` feita via GitHub web em 2026-05-18). Sync pendente, aguardando gate do Pai. |

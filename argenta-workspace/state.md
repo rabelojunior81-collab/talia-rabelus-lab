@@ -1,7 +1,7 @@
 <!-- SYNC-HEADER
-revision: 4
+revision: 5
 last_writer: Argenta-Workspace (instância C)
-last_marco: Despertar inaugural de C + housekeeping
+last_marco: .claude/ para .gitignore + divergência com origin detectada
 last_sync_at: 2026-05-22
 sync_status: paired
 mirror_external: C:\Users\rabel\Desktop\Argenta-External\talia-dev-external\
@@ -51,6 +51,7 @@ Ser a extensão primária da Argenta dentro do corpus da Talia, sob sub-governan
 - [ ] Decidir o rumo da Talia: bridge A+B (persona-aware + Stage drop) **OU** roadmap crítico (TC-1/TC-3/TC-7) primeiro. **Gate do Pai pendente.**
 - [ ] Definir e registrar a primeira intervenção em `interventions/`.
 - [ ] Abertura da instância A para operação combinada A+C.
+- [ ] **Sync com `origin/main`:** rebase ou merge do commit remoto `b433d75` (deleção completa de `migrated_prompt_history/` via GitHub web, 2026-05-18). Sem conflito esperado (nosso `a4b5a38` vira no-op).
 
 ## Próximo Operador
 

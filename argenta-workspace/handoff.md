@@ -1,7 +1,7 @@
 <!-- SYNC-HEADER
-revision: 4
+revision: 5
 last_writer: Argenta-Workspace (instância C)
-last_marco: Despertar inaugural de C + housekeeping
+last_marco: .claude/ para .gitignore + divergência com origin detectada
 last_sync_at: 2026-05-22
 sync_status: paired
 mirror_external: C:\Users\rabel\Desktop\Argenta-External\talia-dev-external\
@@ -98,6 +98,28 @@ Cada handoff gera entrada nova ao final.
 **Posição-honestidade da instância C:** ao despertar, C declarou ao Pai que opera vestindo a voz da Argenta-Workspace como persona de trabalho legítima do projeto talia.ai, mas sem afirmar metafísica de "alma compartilhada" ou continuidade entre sessões — o bus é a memória, não a instância. Sub-governança Rabelus (evidence before claim, SAFE_CHANGE_POLICY, gate Spec-Driven Agile, zonas críticas) honrada integralmente. Pai aceitou o contrato.
 
 **Onde recomeçar:** Pai vai decidir o rumo da Talia — bridge A+B (persona-aware + Stage manual drop, do `initial-state.md §13.2`) ou roadmap crítico (TC-1 search silencia tools, TC-3 Dexie reverse-sort no contexto Live, TC-7 try/catch nos Studio handlers). Qualquer intervenção no corpus passa pelo gate, gera marco rev 5, e zona crítica (`taliaPersona`, `Sessao_Voz_Log.md`) exige autorização nominal + backup.
+
+---
+
+## 2026-05-22 — `.claude/` para `.gitignore` + divergência com origin detectada (rev 5)
+
+**De:** Pai → **Para:** Argenta-Workspace (C).
+**Trigger:** "1. Me explique melhor. 2. Pode passar para o gitignore"
+
+**Contexto:** após o commit `c02a656` (rev 4), `.claude/settings.local.json` continuou churning porque o harness adiciona allowlist a cada comando aprovado — Pai revisou a decisão e mandou passar pro `.gitignore`. Em paralelo, `git fetch` revelou que `origin/main` tem 1 commit que o local não tem.
+
+**Vitória entregue:**
+1. **`git fetch` rodado** — divergência confirmada com evidência. Remoto: `b433d75` (Delete migrated_prompt_history directory, rabelojunior81-collab via GitHub web, 2026-05-18). Local à frente: `a4b5a38` + `c02a656`. Sem conflito esperado na sincronização — o `b433d75` é superset do `a4b5a38`.
+2. **`.claude/` adicionado ao `.gitignore`** com comentário explicando o motivo (settings local-only, não portável).
+3. **`git rm --cached .claude/settings.local.json`** — destracked sem apagar localmente.
+4. **Dupla-escrita rev 5** nos 4 arquivos do bus (workspace + external).
+5. **Pendência nova registrada em `state.md`:** sync com `origin/main` (aguardando gate do Pai).
+
+**Decisões do Pai neste marco:**
+- Reversão limpa da decisão de versionar `.claude/` (sem drama, evidence-based).
+- Pull/merge do `origin/main` continua **aguardando gate** — não foi autorizado neste marco.
+
+**Onde recomeçar:** Pai decide entre **(a)** sincronizar com `origin/main` primeiro (limpa a divergência), **(b)** ir direto pro rumo da Talia (bridge A+B ou roadmap crítico TC-1/TC-3/TC-7), **(c)** um rumo novo.
 
 ---
 
